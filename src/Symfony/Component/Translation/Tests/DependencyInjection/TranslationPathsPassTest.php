@@ -24,6 +24,9 @@ use Symfony\Component\Translation\Tests\DependencyInjection\fixtures\ServiceMeth
 use Symfony\Component\Translation\Tests\DependencyInjection\fixtures\ServiceProperties;
 use Symfony\Component\Translation\Tests\DependencyInjection\fixtures\ServiceSubscriber;
 
+/**
+ * @group legacy
+ */
 class TranslationPathsPassTest extends TestCase
 {
     public function testProcess()

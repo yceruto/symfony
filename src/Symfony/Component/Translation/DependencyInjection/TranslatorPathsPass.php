@@ -19,6 +19,8 @@ use Symfony\Component\DependencyInjection\ServiceLocator;
 
 /**
  * @author Yonel Ceruto <yonelceruto@gmail.com>
+ *
+ * @deprecated since 5.4, all possible paths are already included in debug/update commands
  */
 class TranslatorPathsPass extends AbstractRecursivePass
 {
