@@ -5,6 +5,7 @@ CHANGELOG
 ---
 
  * Deprecate the `VersionAwareTest` trait, use feature detection instead
+ * Add `LazyChoiceLoader` and `choice_lazy` option in `ChoiceType` for loading and rendering choices on demand
 
 7.1
 ---
