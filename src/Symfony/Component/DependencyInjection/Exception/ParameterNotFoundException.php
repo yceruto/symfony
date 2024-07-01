@@ -36,6 +36,7 @@ class ParameterNotFoundException extends InvalidArgumentException implements Not
         private array $alternatives = [],
         private ?string $nonNestedAlternative = null,
         private ?string $sourceExtensionName = null,
+        private ?string $extraMessage = null,
     ) {
         parent::__construct('', 0, $previous);
 
@@ -65,6 +66,10 @@ class ParameterNotFoundException extends InvalidArgumentException implements Not
             $this->message .= implode('", "', $this->alternatives).'"?';
         } elseif (null !== $this->nonNestedAlternative) {
             $this->message .= ' You cannot access nested array items, do you want to inject "'.$this->nonNestedAlternative.'" instead?';
+        }
+
+        if ($this->extraMessage) {
+            $this->message .= ' '.$this->extraMessage;
         }
     }
 
@@ -100,6 +105,18 @@ class ParameterNotFoundException extends InvalidArgumentException implements Not
     public function setSourceExtensionName(?string $sourceExtensionName): void
     {
         $this->sourceExtensionName = $sourceExtensionName;
+
+        $this->updateRepr();
+    }
+
+    public function getExtraMessage(): ?string
+    {
+        return $this->extraMessage;
+    }
+
+    public function setExtraMessage(?string $extraMessage): void
+    {
+        $this->extraMessage = $extraMessage;
 
         $this->updateRepr();
     }

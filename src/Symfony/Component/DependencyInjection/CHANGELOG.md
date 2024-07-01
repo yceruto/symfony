@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+7.2
+---
+
+ * Enable non-empty parameters with `ParameterBag::nonEmpty()` and `ContainerBuilder::nonEmptyParameter()` methods
+
 7.1
 ---
 

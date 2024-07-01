@@ -14,15 +14,17 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
  */
 class ProjectServiceContainer extends Container
 {
+    private const NONEMPTY_PARAMETERS = [
+        'bar' => 'Did you forget to configure the "foo.bar" option?',
+    ];
+
     protected $parameters = [];
 
     public function __construct()
     {
-        $this->parameters = $this->getDefaultParameters();
-
         $this->services = $this->privates = [];
         $this->methodMap = [
-            'test' => 'getTestService',
+            'foo' => 'getFooService',
         ];
 
         $this->aliases = [];
@@ -39,25 +41,29 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'test' shared service.
+     * Gets the public 'foo' shared service.
      *
      * @return \stdClass
      */
-    protected static function getTestService($container)
+    protected static function getFooService($container)
     {
-        return $container->services['test'] = new \stdClass(('file://'.\dirname(__DIR__, 1)), [('file://'.\dirname(__DIR__, 1)) => (\dirname(__DIR__, 2).'/')]);
+        return $container->services['foo'] = new \stdClass($container->getParameter('bar'));
     }
 
     public function getParameter(string $name): array|bool|string|int|float|\UnitEnum|null
     {
         if (!(isset($this->parameters[$name]) || isset($this->loadedDynamicParameters[$name]) || \array_key_exists($name, $this->parameters))) {
-            throw new ParameterNotFoundException($name);
+            throw new ParameterNotFoundException($name, extraMessage: self::NONEMPTY_PARAMETERS[$name] ?? null);
         }
 
         if (isset($this->loadedDynamicParameters[$name])) {
             $value = $this->loadedDynamicParameters[$name] ? $this->dynamicParameters[$name] : $this->getDynamicParameter($name);
         } else {
             $value = $this->parameters[$name];
+        }
+
+        if (isset(self::NONEMPTY_PARAMETERS[$name]) && empty($value)) {
+            throw new \Symfony\Component\DependencyInjection\Exception\EmptyParameterValueException(self::NONEMPTY_PARAMETERS[$name]);
         }
 
         return $value;
@@ -80,7 +86,7 @@ class ProjectServiceContainer extends Container
             foreach ($this->loadedDynamicParameters as $name => $loaded) {
                 $parameters[$name] = $loaded ? $this->dynamicParameters[$name] : $this->getDynamicParameter($name);
             }
-            $this->parameterBag = new FrozenParameterBag($parameters);
+            $this->parameterBag = new FrozenParameterBag($parameters, nonEmptyParameters: self::NONEMPTY_PARAMETERS);
         }
 
         return $this->parameterBag;
@@ -97,10 +103,7 @@ class ProjectServiceContainer extends Container
     protected function getDefaultParameters(): array
     {
         return [
-            'foo' => ('file://'.\dirname(__DIR__, 1)),
-            'bar' => __DIR__,
-            'baz' => (__DIR__.'/PhpDumperTest.php'),
-            'buz' => \dirname(__DIR__, 2),
+
         ];
     }
 }
