@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+7.3
+---
+
+ * Add support for invokable commands and introduce `#[Argument]` and `#[Option]` attributes to define command input arguments and options
+
 7.2
 ---
 
