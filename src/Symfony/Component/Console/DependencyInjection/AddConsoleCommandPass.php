@@ -37,9 +37,15 @@ class AddConsoleCommandPass implements CompilerPassInterface
         $serviceIds = [];
 
         foreach ($commandServices as $id => $tags) {
-            $definition = $container->getDefinition($id);
+            if ($tags[0]['invokable'] ?? false) {
+                $invokableRef = new Reference($id);
+                $definition = $container->register($id .= '.command', $class = Command::class)
+                    ->addMethodCall('setCode', [$invokableRef]);
+            } else {
+                $definition = $container->getDefinition($id);
+                $class = $container->getParameterBag()->resolveValue($definition->getClass());
+            }
             $definition->addTag('container.no_preload');
-            $class = $container->getParameterBag()->resolveValue($definition->getClass());
 
             if (isset($tags[0]['command'])) {
                 $aliases = $tags[0]['command'];

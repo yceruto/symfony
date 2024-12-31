@@ -49,6 +49,7 @@ use Symfony\Component\Config\Resource\DirectoryResource;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\ResourceCheckerInterface;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\DataCollector\CommandDataCollector;
 use Symfony\Component\Console\Debug\CliRequest;
@@ -611,6 +612,17 @@ class FrameworkExtension extends Extension
             ->addTag('asset_mapper.compiler');
         $container->registerForAutoconfiguration(Command::class)
             ->addTag('console.command');
+        $container->registerAttributeForAutoconfiguration(AsCommand::class, static function (ChildDefinition $definition, AsCommand $attribute, \ReflectionClass $reflector): void {
+            if ($reflector->isSubclassOf(Command::class)) {
+                return;
+            }
+
+            if (!$reflector->hasMethod('__invoke')) {
+                throw new LogicException(\sprintf('The class "%s" must implement the "__invoke()" method to be registered as an invokable command.', $reflector->getName()));
+            }
+
+            $definition->addTag('console.command', ['command' => $attribute->name, 'description' => $attribute->description ?? $reflector->getName(), 'invokable' => true]);
+        });
         $container->registerForAutoconfiguration(ResourceCheckerInterface::class)
             ->addTag('config_cache.resource_checker');
         $container->registerForAutoconfiguration(EnvVarLoaderInterface::class)

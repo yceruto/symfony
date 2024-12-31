@@ -49,7 +49,7 @@ class Command
     private string $description = '';
     private ?InputDefinition $fullDefinition = null;
     private bool $ignoreValidationErrors = false;
-    private ?\Closure $code = null;
+    private ?InvokableCommand $code = null;
     private array $synopsis = [];
     private array $usages = [];
     private ?HelperSet $helperSet = null;
@@ -164,6 +164,9 @@ class Command
      */
     protected function configure()
     {
+        if (!$this->code && \is_callable($this)) {
+            $this->code = new InvokableCommand($this, $this(...));
+        }
     }
 
     /**
@@ -274,7 +277,7 @@ class Command
         $input->validate();
 
         if ($this->code) {
-            $statusCode = ($this->code)($input, $output);
+            $statusCode = $this->code->invoke($input, $output);
         } else {
             $statusCode = $this->execute($input, $output);
         }
@@ -327,7 +330,7 @@ class Command
             $code = $code(...);
         }
 
-        $this->code = $code;
+        $this->code = new InvokableCommand($this, $code);
 
         return $this;
     }
@@ -395,7 +398,13 @@ class Command
      */
     public function getNativeDefinition(): InputDefinition
     {
-        return $this->definition ?? throw new LogicException(\sprintf('Command class "%s" is not correctly initialized. You probably forgot to call the parent constructor.', static::class));
+        $definition = $this->definition ?? throw new LogicException(\sprintf('Command class "%s" is not correctly initialized. You probably forgot to call the parent constructor.', static::class));
+
+        if ($this->code && !$definition->getArguments() && !$definition->getOptions()) {
+            $this->code->configure($definition);
+        }
+
+        return $definition;
     }
 
     /**
