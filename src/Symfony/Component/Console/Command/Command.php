@@ -277,7 +277,7 @@ class Command
         $input->validate();
 
         if ($this->code) {
-            $statusCode = $this->code->invoke($input, $output);
+            $statusCode = ($this->code)($input, $output);
         } else {
             $statusCode = $this->execute($input, $output);
         }
