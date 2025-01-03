@@ -206,7 +206,7 @@ class AddConsoleCommandPassTest extends TestCase
         $container->setDefinition('my-command', $definition);
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('The service "my-command" tagged "console.command" must be a subclass of "Symfony\Component\Console\Command\Command".');
+        $this->expectExceptionMessage('The service "my-command" tagged "console.command" must either be a subclass of "Symfony\Component\Console\Command\Command" or have an "__invoke()" method');
 
         $container->compile();
     }

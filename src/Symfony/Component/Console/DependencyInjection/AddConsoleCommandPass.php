@@ -37,25 +37,27 @@ class AddConsoleCommandPass implements CompilerPassInterface
         $serviceIds = [];
 
         foreach ($commandServices as $id => $tags) {
-            if ($tags[0]['invokable'] ?? false) {
-                $invokableRef = new Reference($id);
-                $definition = $container->register($id .= '.command', $class = Command::class)
-                    ->addMethodCall('setCode', [$invokableRef]);
-            } else {
-                $definition = $container->getDefinition($id);
-                $class = $container->getParameterBag()->resolveValue($definition->getClass());
-            }
+            $definition = $container->getDefinition($id);
+            $class = $container->getParameterBag()->resolveValue($definition->getClass());
             $definition->addTag('container.no_preload');
+
+            if (!$r = $container->getReflectionClass($class)) {
+                throw new InvalidArgumentException(\sprintf('Class "%s" used for service "%s" cannot be found.', $class, $id));
+            }
+
+            if (!$r->isSubclassOf(Command::class)) {
+                if ($r->hasMethod('__invoke')) {
+                    $invokableRef = new Reference($id);
+                    $definition = $container->register($id .= '.command', $class = Command::class)
+                        ->addMethodCall('setCode', [$invokableRef]);
+                } else {
+                    throw new InvalidArgumentException(\sprintf('The service "%s" tagged "%s" must either be a subclass of "%s" or have an "__invoke()" method.', $id, 'console.command', Command::class));
+                }
+            }
 
             if (isset($tags[0]['command'])) {
                 $aliases = $tags[0]['command'];
             } else {
-                if (!$r = $container->getReflectionClass($class)) {
-                    throw new InvalidArgumentException(\sprintf('Class "%s" used for service "%s" cannot be found.', $class, $id));
-                }
-                if (!$r->isSubclassOf(Command::class)) {
-                    throw new InvalidArgumentException(\sprintf('The service "%s" tagged "%s" must be a subclass of "%s".', $id, 'console.command', Command::class));
-                }
                 $aliases = str_replace('%', '%%', $class::getDefaultName() ?? '');
             }
 

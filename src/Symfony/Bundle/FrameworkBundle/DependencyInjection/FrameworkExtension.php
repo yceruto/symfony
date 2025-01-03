@@ -613,15 +613,7 @@ class FrameworkExtension extends Extension
         $container->registerForAutoconfiguration(Command::class)
             ->addTag('console.command');
         $container->registerAttributeForAutoconfiguration(AsCommand::class, static function (ChildDefinition $definition, AsCommand $attribute, \ReflectionClass $reflector): void {
-            if ($reflector->isSubclassOf(Command::class)) {
-                return;
-            }
-
-            if (!$reflector->hasMethod('__invoke')) {
-                throw new LogicException(\sprintf('The class "%s" must implement the "__invoke()" method to be registered as an invokable command.', $reflector->getName()));
-            }
-
-            $definition->addTag('console.command', ['command' => $attribute->name, 'description' => $attribute->description ?? $reflector->getName(), 'invokable' => true]);
+            $definition->addTag('console.command', ['command' => $attribute->name, 'description' => $attribute->description ?? $reflector->getName()]);
         });
         $container->registerForAutoconfiguration(ResourceCheckerInterface::class)
             ->addTag('config_cache.resource_checker');
