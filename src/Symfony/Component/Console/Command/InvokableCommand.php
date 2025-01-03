@@ -37,7 +37,7 @@ class InvokableCommand
     /**
      * Invokes a callable with parameters generated from the input interface.
      */
-    public function invoke(InputInterface $input, OutputInterface $output): mixed
+    public function __invoke(InputInterface $input, OutputInterface $output): mixed
     {
         return ($this->code)(...$this->parameters($input, $output));
     }
