@@ -44,6 +44,9 @@ class Option
         }
     }
 
+    /**
+     * @internal
+     */
     public static function tryFrom(\ReflectionParameter $parameter): ?self
     {
         /** @var self $self */
@@ -90,6 +93,9 @@ class Option
         return $self;
     }
 
+    /**
+     * @internal
+     */
     public function toInputOption(): InputOption
     {
         $suggestedValues = \is_callable($this->suggestedValues) ? ($this->suggestedValues)(...) : $this->suggestedValues;
@@ -97,6 +103,9 @@ class Option
         return new InputOption($this->name, $this->shortcut, $this->mode, $this->description, $this->default, $suggestedValues);
     }
 
+    /**
+     * @internal
+     */
     public function resolveValue(InputInterface $input): mixed
     {
         if ('bool' === $this->typeName) {

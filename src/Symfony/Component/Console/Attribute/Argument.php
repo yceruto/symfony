@@ -41,6 +41,9 @@ class Argument
         }
     }
 
+    /**
+     * @internal
+     */
     public static function tryFrom(\ReflectionParameter $parameter): ?self
     {
         /** @var self $self */
@@ -79,6 +82,9 @@ class Argument
         return $self;
     }
 
+    /**
+     * @internal
+     */
     public function toInputArgument(): InputArgument
     {
         $suggestedValues = \is_callable($this->suggestedValues) ? ($this->suggestedValues)(...) : $this->suggestedValues;
@@ -86,6 +92,9 @@ class Argument
         return new InputArgument($this->name, $this->mode, $this->description, $this->default, $suggestedValues);
     }
 
+    /**
+     * @internal
+     */
     public function resolveValue(InputInterface $input): mixed
     {
         return $input->hasArgument($this->name) ? $input->getArgument($this->name) : null;
